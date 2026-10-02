@@ -1,0 +1,14 @@
+{
+  "name": "ai-radar",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI Radar: catalog of new AI products built on the FreeSerp API",
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "node dev-server.mjs",
+    "test": "node --test tests/util.test.mjs tests/proxy.test.mjs"
+  }
+}
