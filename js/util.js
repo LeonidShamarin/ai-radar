@@ -67,6 +67,7 @@ export const CATALOG_DEFAULTS = Object.freeze({
   sort: 'went_live',
   page: 1,
   all: '',
+  adult: '',
 });
 
 const SORTS = new Set(['relevance', 'went_live', 'dr', 'domain']);
@@ -85,6 +86,7 @@ export function parseCatalogState(query) {
   const page = Number(p.get('page'));
   state.page = Number.isInteger(page) && page >= 1 && page <= 400 ? page : 1;
   state.all = p.get('all') === '1' ? '1' : '';
+  state.adult = p.get('adult') === '1' ? '1' : '';
   return state;
 }
 
@@ -101,6 +103,17 @@ export function catalogQuery(state) {
 }
 
 export const PAGE_SIZE = 24;
+
+// The index has no adult-content flag, and AI image niches are full of "undress" generators.
+// Hidden by default on the client; the visitor can opt in.
+const ADULT_TEXT = /\b(nsfw|porn\w*|nude|nudes|nudity|nudify\w*|undress\w*|xxx|hentai|erotic\w*|onlyfans|sexting|deepnude|sex(y|ual)? (chat|ai|images?|videos?))\b|\b18\+/i;
+const ADULT_DOMAIN = /(porn|nude|nudify|undress|xxx|hentai|nsfw|onlyfans)/i;
+
+export function isAdult(site) {
+  if (!site) return false;
+  if (ADULT_DOMAIN.test(site.domain || '')) return true;
+  return ADULT_TEXT.test(`${site.title || ''} ${site.ai_summary || ''}`);
+}
 
 // Translates UI state into FreeSerp Main query params. `latestDate` is the newest went_live
 // in the index: the AI index lags behind real time, so "last 7 days" is counted from it.

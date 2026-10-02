@@ -115,3 +115,13 @@ test('parseCompareList dedupes, validates, caps at 4', () => {
   assert.deepEqual(parseCompareList('a.ai,A.ai,bad,b.com,c.io,d.dev,e.net'), ['a.ai', 'b.com', 'c.io', 'd.dev']);
   assert.deepEqual(parseCompareList(''), []);
 });
+
+test('isAdult catches NSFW generators without hitting normal words', async () => {
+  const { isAdult } = await import('../js/util.js');
+  assert.equal(isAdult({ domain: 'undressaitool.ai', title: 'x' }), true);
+  assert.equal(isAdult({ domain: 'example.ai', title: 'Free NSFW image generator' }), true);
+  assert.equal(isAdult({ domain: 'example.ai', ai_summary: 'generates realistic nude images' }), true);
+  assert.equal(isAdult({ domain: 'essex-ai.co.uk', title: 'AI consulting in Essex' }), false);
+  assert.equal(isAdult({ domain: 'socixis.dev', title: 'AI Marketing Co-Founder' }), false);
+  assert.equal(isAdult(null), false);
+});

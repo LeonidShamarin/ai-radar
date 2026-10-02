@@ -74,6 +74,7 @@ section { margin-top: 36px; }
 .nav a { color: var(--muted); text-decoration: none; padding: 8px 10px; border-radius: 8px; font-weight: 500; }
 .nav a:hover { color: var(--text); background: var(--bg); }
 .nav a[aria-current] { color: var(--accent); background: var(--accent-soft); }
+.badge[hidden] { display: none; }
 .badge { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 10px; background: var(--accent); color: var(--accent-text); font-size: 0.75rem; text-align: center; line-height: 20px; }
 
 /* buttons and inputs */
@@ -125,11 +126,11 @@ input, select {
 .fav-letter { display: inline-flex; align-items: center; justify-content: center; font-weight: 700; color: var(--accent); background: var(--accent-soft); }
 .tags { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; flex-wrap: wrap; }
 .tags a { display: inline-block; font-size: 0.78rem; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); text-decoration: none; }
-.meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: auto 0 0; font-size: 0.85rem; }
+.meta { display: grid; grid-template-columns: 0.6fr 1.2fr 1fr; gap: 6px; margin: auto 0 0; font-size: 0.85rem; }
 .meta dt { color: var(--muted); font-size: 0.75rem; }
 .meta dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
 .card-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-.card-actions .btn { flex: 1 1 auto; }
+.card-actions .btn { flex: 1 1 110px; padding: 8px 10px; font-size: 0.92rem; white-space: nowrap; }
 
 .skeleton { min-height: 220px; background: linear-gradient(90deg, var(--surface) 0%, var(--bg) 50%, var(--surface) 100%); background-size: 200% 100%; animation: shimmer 1.2s infinite linear; }
 .stat.skeleton { min-height: 86px; }
@@ -137,7 +138,7 @@ input, select {
 @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
 
 /* catalog filters */
-.filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; align-items: end; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+.filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 12px; align-items: end; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
 .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .field label { font-size: 0.85rem; color: var(--muted); }
 .field-wide { grid-column: 1 / -1; }

@@ -12,6 +12,7 @@ import {
   pageCount,
   bestIndex,
   parseCompareList,
+  isAdult,
   MAX_COMPARE,
 } from './util.js';
 
@@ -35,7 +36,7 @@ function loadStats() {
 // counted from this date instead of "today".
 let latestPromise = null;
 function loadLatestDate() {
-  latestPromise ??= query({ ai_startups: 1, sort: 'went_live', order: 'desc', size: 8 })
+  latestPromise ??= query({ ai_startups: 1, sort: 'went_live', order: 'desc', size: 12 })
     .then((d) => ({ date: d.results?.[0]?.went_live || null, newest: d.results || [] }))
     .catch((err) => {
       latestPromise = null;
@@ -57,7 +58,8 @@ function builderOptions(stats) {
 }
 
 const BUILDER_LABELS = {
-  ai_likely: 'Схоже, згенеровано AI',
+  ai_likely: 'AI-генерація',
+  not_ai: 'Класичний',
   lovable: 'Lovable',
   v0: 'v0',
   bolt: 'Bolt',
@@ -71,7 +73,9 @@ const BUILDER_LABELS = {
   elementor: 'Elementor',
   joomla: 'Joomla',
 };
-const builderLabel = (key) => BUILDER_LABELS[key] || key;
+// ai_source can also be a raw generator meta tag ("gen:wpml ver4.9.6 ..."): not useful to show.
+const builderLabel = (key) => BUILDER_LABELS[key] || (key.startsWith('gen:') ? 'Інший' : key);
+const safeOnly = (sites) => (sites || []).filter((s) => !isAdult(s));
 
 // ---------- compare list (per-visitor, localStorage) ----------
 
@@ -230,13 +234,13 @@ async function renderOverview(signal) {
   });
 
   const newestTask = loadLatestDate().then(({ newest }) => {
-    if (!signal.aborted) document.getElementById('newest').innerHTML = grid(newest.slice(0, 8));
+    if (!signal.aborted) document.getElementById('newest').innerHTML = grid(safeOnly(newest).slice(0, 8));
   });
 
   const topTask = loadLatestDate()
     .then(({ date }) => query(toApiParams({ ...parseCatalogState('sort=dr&since=30') }, date), { signal }))
     .then((d) => {
-      if (!signal.aborted) document.getElementById('top').innerHTML = grid((d.results || []).slice(0, 8));
+      if (!signal.aborted) document.getElementById('top').innerHTML = grid(safeOnly(d.results).slice(0, 8));
     });
 
   const results = await Promise.allSettled([statsTask, newestTask, topTask]);
@@ -270,6 +274,7 @@ async function renderCatalog(signal, queryString) {
         <div class="field"><label for="f-sort">Сортування</label>
           <select id="f-sort" name="sort"><option value="went_live">Спершу нові</option><option value="dr">За DR</option><option value="relevance">За релевантністю</option><option value="domain">За доменом (А-Я)</option></select></div>
         <label class="check"><input type="checkbox" name="all" value="1"> Показати весь шум (магазини, каталоги, агентства з AI на сайті)</label>
+        <label class="check"><input type="checkbox" name="adult" value="1"> Показувати сайти 18+</label>
         <button type="button" class="btn btn-ghost" data-action="reset">Скинути фільтри</button>
       </form>
       <p id="result-info" class="muted" aria-live="polite"></p>
@@ -302,12 +307,15 @@ async function renderCatalog(signal, queryString) {
     const { date } = await loadLatestDate();
     const data = await query(toApiParams(state, date), { signal });
     if (signal.aborted) return;
-    const items = data.results || [];
+    const raw = data.results || [];
+    const items = state.adult === '1' ? raw : safeOnly(raw);
+    const hidden = raw.length - items.length;
     const total = data.total || 0;
     const pages = pageCount(total);
     const windowNote = state.since && date ? ` Запущені ${sinceLabel(state.since)} до ${formatDate(date)}.` : '';
+    const hiddenNote = hidden ? ` На цій сторінці приховано сайтів 18+: ${hidden}.` : '';
     info.textContent = total
-      ? `Знайдено ${formatNumber(total)}. Сторінка ${state.page} з ${formatNumber(pages)}.${windowNote}`
+      ? `Знайдено ${formatNumber(total)}. Сторінка ${state.page} з ${formatNumber(pages)}.${windowNote}${hiddenNote}`
       : `Нічого не знайдено.${windowNote}`;
     results.innerHTML = items.length
       ? grid(items)
@@ -338,6 +346,7 @@ function syncForm(state) {
     el.value = state[name];
   }
   form.elements.all.checked = state.all === '1';
+  form.elements.adult.checked = state.adult === '1';
 }
 
 function formState(form) {
@@ -351,6 +360,7 @@ function formState(form) {
       since: fd.get('since') || '',
       sort: fd.get('sort') || '',
       all: fd.get('all') ? '1' : '',
+      adult: fd.get('adult') ? '1' : '',
       page: 1,
     }),
   );
@@ -416,9 +426,9 @@ async function renderSite(signal, rawDomain) {
       similarEl.innerHTML = '<p class="muted">У сайту не визначена ніша.</p>';
       return;
     }
-    const data = await query({ ai_startups: 1, ai_categories: niche, sort: 'dr', order: 'desc', size: 7 }, { signal });
+    const data = await query({ ai_startups: 1, ai_categories: niche, sort: 'dr', order: 'desc', size: 12 }, { signal });
     if (signal.aborted) return;
-    const similar = (data.results || []).filter((r) => r.domain !== domain).slice(0, 6);
+    const similar = safeOnly(data.results).filter((r) => r.domain !== domain).slice(0, 6);
     similarEl.innerHTML = similar.length ? grid(similar) : '<p class="muted">Схожих не знайшлось.</p>';
   } catch (err) {
     if (err.name === 'AbortError') return;
