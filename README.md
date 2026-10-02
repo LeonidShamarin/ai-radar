@@ -4,7 +4,7 @@
 (індекс `sites`: головні сторінки сайтів, ніша AI). Тестове завдання на вакансію
 Junior AI Web Developer у Semalt.
 
-**Демо:** https://ai-radar.vercel.app
+**Демо:** https://ai-radar-eight-tan.vercel.app
 **План сайту:** [PLAN.md](PLAN.md) (мета, аудиторія, сторінки, структура, рішення)
 
 ![AI Radar](og.png)
