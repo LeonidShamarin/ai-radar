@@ -77,6 +77,11 @@ npm test           # 14 тестів
 
 Деплой: імпорт репозиторію у Vercel, без налаштувань (Framework Preset: Other).
 
+Воркспейс Semalt (nginx + PHP, корінь сайту `/var/www/html`): у терміналі воркспейсу
+`git clone` цього репозиторію в `~/projects` і `bash ai-radar/deploy/semalt/install.sh`.
+Скрипт копіює статику, а функцію Vercel замінює на PHP-проксі з тим самим білим списком
+параметрів (`deploy/semalt/freeserp.php`). Старий вміст кореня сайту зберігається в бекап.
+
 ## Що з'ясувалось про API (і як це враховано)
 
 1. **CORS з браузера не працює, хоча документація каже «CORS-open».** FreeSerp віддає
