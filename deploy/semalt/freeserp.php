@@ -1,6 +1,6 @@
 <?php
 // PHP port of lib/proxy.js for hosts with nginx + php-fpm (the Semalt workspace).
-// Installed as /var/www/html/api/freeserp/index.php, so the client's `api/freeserp?...` hits it.
+// Installed as /var/www/html/api/freeserp/index.php; install.sh points the deployed client at that path.
 // Same rules: fixed upstream, whitelisted parameters with length caps, not an open proxy.
 
 const UPSTREAM = 'https://freeserp.ai/api.php';

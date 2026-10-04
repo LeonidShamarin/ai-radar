@@ -19,5 +19,10 @@ cp -a "$REPO/css" "$REPO/js" "$WEB"/
 mkdir -p "$WEB/api/freeserp"
 cp "$REPO/deploy/semalt/freeserp.php" "$WEB/api/freeserp/index.php"
 
+# nginx answers `api/freeserp` (a directory here) with a 301 to plain http://, which the browser
+# blocks on an https page. Point the deployed client straight at the PHP file instead.
+sed -i "s#\['api/freeserp',#['api/freeserp/index.php',#" "$WEB/js/api.js"
+grep -q "'api/freeserp/index.php'" "$WEB/js/api.js" || { echo "ERROR: endpoint not rewritten in js/api.js" >&2; exit 1; }
+
 echo "Backup of the old web root: $BACKUP"
 echo "Done. Open your workspace website and check that the cards load."
